@@ -53,14 +53,14 @@ class Calculator extends Component {
 
     clearDisplay = () => {
         console.log("Clear")
-        const clearState = {...this.state}; 
+        const clearState = { ...this.state };
         clearState.operandOne = [];
         clearState.operandTwo = [];
         clearState.selectedOperation = "";
         clearState.display = "0";
         clearState.doEvaluate = false;
-                    
-        this.setState(()=>{return clearState});
+
+        this.setState(() => { return clearState });
     }
 
     handleClickOperation = (operation) => {
@@ -71,10 +71,10 @@ class Calculator extends Component {
             })
             return;
         }
-        this.setState({ 
-                selectedOperation: operation,
-                doEvaluate: false 
-            })
+        this.setState({
+            selectedOperation: operation,
+            doEvaluate: false
+        })
     }
 
     populateDisplayWith() {
@@ -113,16 +113,18 @@ class Calculator extends Component {
 
                 <Display toDisplay={displayContent} />
 
-                <div className='buttons'>
+                <div className='button-container'>
                     <div className='numpad'>
-
                         <ClearButton onClick={this.clearDisplay} />
-                        <Numbers numbers={this.state.numbers} onClick={this.handleClickNumber} />
-
+                        <Numbers
+                            numbers={this.state.numbers}
+                            onClick={this.handleClickNumber}
+                        />
                     </div>
-                    {/* <div> */}
-                        <OperationButtons operationButtons={this.state.operationBtns} onClick={this.handleClickOperation} />
-                    {/* </div> */}
+                    <OperationButtons
+                        operationButtons={this.state.operationBtns}
+                        onClick={this.handleClickOperation}
+                    />
                 </div>
 
             </div>

@@ -1,5 +1,3 @@
 .operation-btn {
-    background-color: white;
-    font-size: 30px;
-    padding: 15px;
+    flex: 1 1 100%;
 }

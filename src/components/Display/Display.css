@@ -1,13 +1,12 @@
 .display {
-    width: 100%;    
-    border-bottom: 1px solid #c9270b;    
     background: rgb(53, 22, 22);
-    color: rgb(238, 224, 224);
+    border-bottom: 1px solid #c9270b;    
+    color: antiquewhite;
     font-weight: 400;
     font-size: 60px;
-    text-align: right;
-    box-sizing: border-box;
     padding: 20px 10px;    
+    text-align: right;
+    width: 100%;            
 }
 
 .display span {    
