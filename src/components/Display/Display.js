@@ -5,7 +5,8 @@ import './Display.css'
 const display = (props) => {
     return (
         <div className='display'>
-            <span>{props.toDisplay}</span>             
+            <span className="operation">{props.toDisplayOperation}</span>
+            <span className="number">{props.toDisplayNumber}</span>             
         </div>
     );
 };

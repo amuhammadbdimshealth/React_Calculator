@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+
 
 import './Calculator.css'
 import Display from '../../components/Display/Display'
@@ -10,19 +10,12 @@ import Numbers from '../../components/Numbers/Numbers'
 
 class Calculator extends Component {
     state = {
-        numbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 0],
         operandOne: [], //100
         operandTwo: [], //200
-        selectedOperation: "", //Add, Subtract, ...
-        display: "0", //300
-        operationBtns: [
-            { operation: 'Add', display: '+' },
-            { operation: 'Subtract', display: '-' },
-            { operation: 'Divide', display: '÷' },
-            { operation: 'Multiply', display: 'x' },
-            { operation: 'Evaluate', display: '=' }
-        ],
-        doEvaluate: false
+        selectedOperation: "", //Add, Subtract, ... 
+        selectedChainedOperation: "",       
+        doEvaluate: false,
+        resultHistory: []
     }
 
     operationFunctions = {
@@ -32,13 +25,37 @@ class Calculator extends Component {
         Divide: (num1, num2) => num1 / num2
     }
 
+
+    componentDidUpdate() {
+        // once evaluation is done switch off the doEvaluation 
+        const resultHistoryLastIndex = this.state.resultHistory.length - 1;
+
+        if (this.state.doEvaluate) {
+            const clearState = {
+                ...this.state,
+                operandOne: this.state.resultHistory[resultHistoryLastIndex].toString().split(''),
+                operandTwo: [],
+                selectedOperation: this.state.selectedChainedOperation,
+                selectedChainedOperation: "",
+                doEvaluate: false
+            };
+
+            this.setState(() => { return clearState });
+        }
+        // also clear the operands and selected state
+    }
+
     handleClickNumber = (value) => {
+        //check if operandOne already exists from previous history        
+        const hasCalculationtHistory = this.state.resultHistory.length ? true : false;
+              
         if (!this.state.selectedOperation) { //if no operation is selected yet
-            const operandOne = this.state.operandOne;
+            const operandOne = hasCalculationtHistory ? [] : this.state.operandOne;
             operandOne.push(value);
             this.setState({
                 operandOne: operandOne,
-                doEvaluate: false
+                doEvaluate: false,
+                resultHistory: []
             })
         } else {
             const operandTwo = this.state.operandTwo;
@@ -52,33 +69,52 @@ class Calculator extends Component {
     }
 
     clearDisplay = () => {
-        console.log("Clear")
-        const clearState = { ...this.state };
-        clearState.operandOne = [];
-        clearState.operandTwo = [];
-        clearState.selectedOperation = "";
-        clearState.display = "0";
-        clearState.doEvaluate = false;
-
+        const clearState = {
+            ...this.state,
+            operandOne: [],
+            operandTwo: [],
+            selectedOperation: "",
+            selectedChainedOperation: "",            
+            doEvaluate: false,
+            display: "0",
+            resultHistory: []
+        }
         this.setState(() => { return clearState });
     }
 
-    handleClickOperation = (operation) => {
-        // this.operationFunctions[operation]();
-        if (operation == "Evaluate") {
+    handleClickOperation = (operation) => { //Add, Subtract, Divide, Multiply, Evaluate
+
+        const operandOne = Number.parseFloat(this.state.operandOne.join(''));
+        const operandTwo = Number.parseFloat(this.state.operandTwo.join(''));
+        const hasClickedEqualTo = (operation === "Evaluate");
+        const hasOperandTwo = operandTwo ? true : false;        
+        //override if Evaluate clicked
+        const calculationType = this.state.selectedOperation;
+
+        if (!operandOne || (!hasOperandTwo && hasClickedEqualTo)) return;
+        if (hasOperandTwo) { //evaluate if operandTwo exists and cliked any Operation
+            const result = this.operationFunctions[calculationType](operandOne, operandTwo)
+            const resultHistory = [...this.state.resultHistory];
+            resultHistory.push(result);
+            let selectedChainedOperation = "";
+            if (!hasClickedEqualTo) {
+                selectedChainedOperation = operation;
+            }
             this.setState({
-                doEvaluate: true
+                doEvaluate: true,
+                resultHistory: resultHistory,
+                selectedChainedOperation: selectedChainedOperation
             })
             return;
         }
         this.setState({
-            selectedOperation: operation,
+            selectedOperation: operation, //never set selected operation as "=".Set only (+ - / x)
             doEvaluate: false
         })
     }
 
     populateDisplayWith() {
-        let displayContent;
+        let displayContent = "0";
         const isOperationSelected = this.state.selectedOperation ? true : false;
         const operandOne = Number.parseFloat(this.state.operandOne.join(''));
         const operandTwo = Number.parseFloat(this.state.operandTwo.join(''));
@@ -95,10 +131,10 @@ class Calculator extends Component {
                 } else {
                     if (operandTwo) {
                         displayContent = operandTwo;
-                    } else displayContent = this.state.selectedOperation
+                    } else displayContent = operandOne
                 }
 
-            } else displayContent = this.state.display;
+            } 
         }
 
         return displayContent;
@@ -110,19 +146,20 @@ class Calculator extends Component {
 
         return (
             <div className='calculator'>
-
-                <Display toDisplay={displayContent} />
-
+                <Display
+                    toDisplayNumber={displayContent}
+                    toDisplayOperation={this.state.selectedOperation}
+                />
                 <div className='button-container'>
                     <div className='numpad'>
                         <ClearButton onClick={this.clearDisplay} />
                         <Numbers
-                            numbers={this.state.numbers}
+                            numbers={this.props.numbers}
                             onClick={this.handleClickNumber}
                         />
                     </div>
                     <OperationButtons
-                        operationButtons={this.state.operationBtns}
+                        operationButtons={this.props.operationBtns}
                         onClick={this.handleClickOperation}
                     />
                 </div>
